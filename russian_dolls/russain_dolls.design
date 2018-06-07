@@ -1,0 +1,20 @@
+Data structures
+
+purple_pool / white_pool / counter_chain_pool
+	// Probably the doubly linked list (list)
+	* .empty()
+	* access first element
+	* .pop_front()
+	* .push_back()
+	* .pop_from_middle()
+
+doll object
+	.has_relation
+	h, d, w doubles
+
+CounterChain object
+	red / blue pool_queue's
+		* .empty()
+		* access first element
+		* .pop_front()
+		* .push_back()
