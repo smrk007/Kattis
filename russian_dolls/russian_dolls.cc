@@ -1,6 +1,13 @@
 #include <iostream>
 #include <list>
 #include <queue>
+#include <vector>
+
+//////////////////////////////////////////////////
+// Utility functions
+auto compare = [] (Doll &a, Doll &b) -> bool { return a < b; }
+
+//////////////////////////////////////////////////
 
 //////////////////////////////////////////////////
 class Doll {
@@ -20,19 +27,26 @@ public:
 	}
 	
 	// Accessors
-	int getHeight () { return height; }
-	int getDiameter () { return diameter; }
-	int getWidth () { return width; }
+	int getHeight () const { return height; }
+	int getDiameter () const { return diameter; }
+	int getWidth () const { return width; }
 
-	bool has_relation (Doll other_doll);
-	void print() {
+	// Comparison
+	bool has_relation (Doll other_doll) const;
+	void print() const {
 		std::cout << "Doll: " << height << " " << diameter << " " << width << std::endl;
 	}
-	bool operator== (Doll other) {
+	bool operator== (Doll other) const {
 		bool condition1 = height == other.getHeight();
 		bool condition2 = diameter == other.getDiameter();
 		bool condition3 = width == other.getWidth();
 		return condition1 && condition2 && condition3;
+	}
+	bool operator< (const Doll other) const {
+		getHeight() < other.getHeight();
+	}
+	bool operator> (const Doll other) const {
+		getHeight() > other.getHeight();
 	}
 };
 //////////////////////////////////////////////////
@@ -44,16 +58,32 @@ class CounterChain {
 private:
 	Doll base;
 	std::queue<Doll> red_pool_queue, blue_pool_queue;
-	std::list<Doll> red_pool, blue_pool;
+	std::priority_queue<Doll, std::vector<Doll>, decltype(&comparison)> red_pool, blue_pool;
 public:
 	// Initialization
 	CounterChain (Doll b) {
 		base = b;
+		red_pool = std::priority_queue<Doll, std::vector<Doll>, decltype(&comparison)> (&compare);
+		blue_pool = std::priority_queue<Doll, std::vector<Doll>, decltype(&comparison)> (&compare);
 	}
 
 	int size() { return red_pool.size() + blue_pool.size(); }
 	Doll getBase() { return base; }
 	void fill (std::list<Doll>& white_pool);
+	void print_and_erase() {
+		// Print red pool
+		while (!red_pool.empty()) {
+			red_pool.top().print();
+			red_pool.pop();
+		}
+		std::cout << "-" << std::endl;
+		// Print blue pool
+		while (!blue_pool.empty()) {
+			blue_pool.top().print();
+			blue_pool.pop();
+		}
+		std::cout << std::endl;
+	}
 };
 //////////////////////////////////////////////////
 
@@ -97,8 +127,8 @@ int solve_problem (int dolls_per_set) {
 			counter_chain_pool.push_back(nextChain);
 		}
 	}
-		
-	std::cout << counter_chain_pool.size() << std::endl;
+	
+	counter_chain_pool.front().print_and_erase();
 	
 	// Populating the master chain
 	// TODO: Populate that shit
@@ -106,7 +136,7 @@ int solve_problem (int dolls_per_set) {
 	return 0;
 }
 
-bool Doll::has_relation (Doll other_doll) {
+bool Doll::has_relation (Doll other_doll) const {
 // TODO: Test has_relation
 	//////////////////////////////////////////////////
 	// Tests if either doll can fit within the other,
@@ -173,11 +203,7 @@ void CounterChain::fill (std::list<Doll>& white_pool) {
 			doll_iterator = white_pool.begin();
 			while (doll_iterator != white_pool.end()) {
 		
-				if (temp == Doll(97, 97, 3)) {
-					doll_iterator->print();
-				}
-				
-				if (doll_iterator->has_relation(temp)) {
+				if (!doll_iterator->has_relation(temp)) {
 					blue_pool_queue.push(*doll_iterator);
 					doll_iterator = white_pool.erase(doll_iterator);
 				} else {
@@ -186,7 +212,7 @@ void CounterChain::fill (std::list<Doll>& white_pool) {
 			} 
 		
 			// Finalize element
-			red_pool.push_back( temp );
+			red_pool.push( temp );
 		}
 
 		while ( !blue_pool_queue.empty() ) {
@@ -197,7 +223,7 @@ void CounterChain::fill (std::list<Doll>& white_pool) {
 			// Load counters to temp
 			doll_iterator = white_pool.begin();
 			while (doll_iterator != white_pool.end()) {
-				if (doll_iterator->has_relation(temp)) {
+				if (!doll_iterator->has_relation(temp)) {
 					red_pool_queue.push(*doll_iterator);
 					doll_iterator = white_pool.erase(doll_iterator);
 				} else {
@@ -206,7 +232,7 @@ void CounterChain::fill (std::list<Doll>& white_pool) {
 			} 
 
 			// Finalize element
-			blue_pool.push_back( temp );
+			blue_pool.push( temp );
 		}
 	}
 }
