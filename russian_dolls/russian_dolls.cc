@@ -1,13 +1,8 @@
+#include <algorithm>
 #include <iostream>
 #include <list>
 #include <queue>
 #include <vector>
-
-//////////////////////////////////////////////////
-// Utility functions
-auto compare = [] (Doll &a, Doll &b) -> bool { return a < b; }
-
-//////////////////////////////////////////////////
 
 //////////////////////////////////////////////////
 class Doll {
@@ -58,29 +53,30 @@ class CounterChain {
 private:
 	Doll base;
 	std::queue<Doll> red_pool_queue, blue_pool_queue;
-	std::priority_queue<Doll, std::vector<Doll>, decltype(&comparison)> red_pool, blue_pool;
+ 	std::vector<Doll> red_pool, blue_pool;
 public:
 	// Initialization
 	CounterChain (Doll b) {
 		base = b;
-		red_pool = std::priority_queue<Doll, std::vector<Doll>, decltype(&comparison)> (&compare);
-		blue_pool = std::priority_queue<Doll, std::vector<Doll>, decltype(&comparison)> (&compare);
 	}
 
 	int size() { return red_pool.size() + blue_pool.size(); }
 	Doll getBase() { return base; }
 	void fill (std::list<Doll>& white_pool);
 	void print_and_erase() {
+		// Ensure that the vector is sorted
+		std::sort(red_pool.rbegin(),red_pool.rend());
+		std::sort(blue_pool.rbegin(),blue_pool.rend());
 		// Print red pool
 		while (!red_pool.empty()) {
-			red_pool.top().print();
-			red_pool.pop();
+			red_pool.back().print();
+			red_pool.pop_back();
 		}
 		std::cout << "-" << std::endl;
 		// Print blue pool
 		while (!blue_pool.empty()) {
-			blue_pool.top().print();
-			blue_pool.pop();
+			blue_pool.back().print();
+			blue_pool.pop_back();
 		}
 		std::cout << std::endl;
 	}
@@ -127,7 +123,7 @@ int solve_problem (int dolls_per_set) {
 			counter_chain_pool.push_back(nextChain);
 		}
 	}
-	
+
 	counter_chain_pool.front().print_and_erase();
 	
 	// Populating the master chain
@@ -212,7 +208,7 @@ void CounterChain::fill (std::list<Doll>& white_pool) {
 			} 
 		
 			// Finalize element
-			red_pool.push( temp );
+			red_pool.push_back( temp );
 		}
 
 		while ( !blue_pool_queue.empty() ) {
@@ -232,7 +228,7 @@ void CounterChain::fill (std::list<Doll>& white_pool) {
 			} 
 
 			// Finalize element
-			blue_pool.push( temp );
+			blue_pool.push_back( temp );
 		}
 	}
 }
