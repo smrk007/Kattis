@@ -62,6 +62,8 @@ public:
 
 	int size() { return red_pool.size() + blue_pool.size(); }
 	Doll getBase() { return base; }
+	Doll getRedPool { return red_pool; }
+	Doll getBluePool { return blue_pool; }
 	void fill (std::list<Doll>& white_pool);
 	void print_and_erase() {
 		// Ensure that the vector is sorted
@@ -80,7 +82,38 @@ public:
 		}
 		std::cout << std::endl;
 	}
+	int delta_value() {
+		return red_pool.size() - blue_pool.size();
+	}
+	void flip_pool() {
+		std::vector<Doll> hold = red_pool;
+		red_pool = blue_pool;
+		blue_pool = red_pool;
+	}
+	void insert_counter_chain (CounterChain other) {
+		std::vector<Doll> red_hold = other.getRedPool();
+		std::vector<Doll> blue_hold = other.getBluePool();
+		
+		while (!red_hold.empty()) {
+			red_pool.push_back(red_hold.back());
+			red_hold.pop_back();
+		}
+
+		while (!blue_hold.empty()) {
+			blue_pool.push_back(blue_hold.back());
+			blue_hold.pop_back();
+		}
+
+	}
 };
+
+CounterChain subset_sum(int No2, std::vector<CounterChain>) {
+	
+	
+
+
+}
+
 //////////////////////////////////////////////////
 
 int solve_problem (int dolls_per_set) {
@@ -115,19 +148,22 @@ int solve_problem (int dolls_per_set) {
 		
 		// Filling the counter chain
 		nextChain.fill(white_pool);
-		
-		// Dealing with the outcome of .fill()
-		if ( nextChain.size() == 1 ) {
-			purple_pool.push_back(nextChain.getBase());
-		} else {
-			counter_chain_pool.push_back(nextChain);
-		}
+		counter_chain_pool.push_back(nextChain);
 	}
-
-	counter_chain_pool.front().print_and_erase();
 	
 	// Populating the master chain
 	// TODO: Populate that shit
+
+	// Finding the sum of the counter chains
+	int sum = 0;
+	for (int i = 0; i < counter_chain_pool.size(); i++) {
+		if (counter_chain_pool.at(i).delta_value() < 0) {
+			counter_chain_pool.at(i).flip_pool();
+		}
+		sum += cc.delta_value();
+	}
+
+	CounterChain output = subset_sum(sum/2, counter_chain_pool);
 
 	return 0;
 }
